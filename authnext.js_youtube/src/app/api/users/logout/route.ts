@@ -35,8 +35,7 @@ export async function POST(request: NextRequest){
             email: user.email
         }
         //create token
-        const token = await jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: "1d"})
-
+        const token = jwt.sign(tokenData, process.env.TOKEN_SECRET!, {expiresIn: "1d"})
         const response = NextResponse.json({
             message: "Login successful",
             success: true,
@@ -49,5 +48,26 @@ export async function POST(request: NextRequest){
 
     } catch (error: any) {
         return NextResponse.json({error: error.message}, {status: 500})
+    }
+}
+
+export async function GET(request: NextRequest) {
+    try {
+        // Clear the token cookie
+        const response = NextResponse.json({
+            message: "Logout successful",
+            success: true,
+        });
+        response.cookies.set("token", "", {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            expires: new Date(0), // Expire the cookie immediately
+        });
+
+        return response;
+    } catch (error: any) {
+        console.error("Error in logout route:", error.message);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
